@@ -21,7 +21,7 @@ A custom templater for CakePHP that enables you to define default HTML attribute
 ## Requirements
 
 - CakePHP 5.0 or higher
-- PHP 8.2 or higher
+- PHP 8.1 or higher
 
 ## Installation
 
