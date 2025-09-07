@@ -65,6 +65,7 @@ use TemplaterDefaults\View\StringTemplate;
 
 $this->loadHelper('Form', [
     'templateClass' => StringTemplate::class,
+    'templates' => 'my_app_templates', // Your template defintion
 ]);
 ```
 
