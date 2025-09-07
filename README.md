@@ -42,12 +42,15 @@ The current way would be defining attributes on your template but when you want 
 
 // Render with FormHelper
 $this->Form->input('field', ['class' => 'customClass']);
-
-// Results in:
-// <input type="text" name="field" class="defaultClass" data="customClass" />
 ```
 
-As you can see in the example above, this is not the inteded result.
+Renders to
+
+```html
+<input type="text" name="field" class="defaultClass" class="customClass" />
+```
+
+As you can see in the example above, the `class` is added twice. This is of course **not the inteded result**.
 
 ## Usage
 
@@ -64,7 +67,7 @@ $this->loadHelper('Form', [
 ]);
 ```
 
-### 2. Define Templates with Defaults
+### 2. Define Templates with defaults
 
 Add default attributes to your templates. For example, to set a default class and a custom data attribute for all input fields:
 
@@ -87,10 +90,15 @@ Now, every input field will automatically include the default class and data att
 
 ```php
 <?= $this->Form->control('field'); ?>
-// <input type="text" name="field" class="defaultClass" data-star="wars" />
 ```
 
-### 3. Merging Default and Runtime Values
+Renders to
+
+```html
+<input type="text" name="field" class="defaultClass" data-star="wars" />
+```
+
+### 3. Merging default and runtime values
 
 If you want to merge default values with those provided at runtime (e.g., for classes), use an array for the default value:
 
@@ -109,7 +117,12 @@ When you specify a class at runtime, it will be merged:
 
 ```php
 <?= $this->Form->control('field', ['class' => 'thirdClass']); ?>
-// <input type="text" name="field" class="firstClass secondClass thirdClass" />
+```
+
+Renders to
+
+```html
+<input type="text" name="field" class="firstClass secondClass thirdClass" />
 ```
 
 ### 4. Advanced Example: Multiple Attributes
@@ -134,7 +147,12 @@ echo $this->Form->control('username', [
     'class' => 'is-invalid',
     'data-toggle' => 'override',
 ]); ?>
-// <input type="text" name="username" class="form-control mb-2 is-invalid" data-toggle="override" aria-label="Custom input" />
+```
+
+Renders to
+
+```html
+<input type="text" name="username" class="form-control mb-2 is-invalid" data-toggle="override" aria-label="Custom input" />
 ```
 
 ## Contributing

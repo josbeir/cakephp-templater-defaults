@@ -22,7 +22,7 @@ class StringTemplate extends StringTemplateBase
                     'defaults' => [],
                 ];
 
-                $this->defaults[$name] = $template['defaults'] ?? [];
+                $this->defaults[$name] = $template['defaults'];
                 $templates[$name] = $template['template'];
             }
         }
@@ -45,15 +45,15 @@ class StringTemplate extends StringTemplateBase
 
             $attributes = [];
             foreach ($attrMatches as $match) {
-                $attributes_key = $match[1];
+                $attribute_key = $match[1];
                 $attribute_value = $match[3];
-                $defaults_value = $defaults[$attributes_key] ?? null;
+                $defaults_value = $defaults[$attribute_key] ?? null;
 
                 if (is_array($defaults_value)) {
                     $attribute_value = (array)$attribute_value;
                 }
 
-                $attributes[$attributes_key] = $attribute_value;
+                $attributes[$attribute_key] = $attribute_value;
             }
 
             $merged = Hash::merge($defaults, $attributes);
