@@ -15,8 +15,12 @@ A custom templater for CakePHP that enables you to define default HTML attribute
 - Easy setup
 - Define default attributes and values for CakePHP string templates
 - Merge default attributes and runtime attributes seamlessly (e.g., for classes)
-- Simplifies integration with CSS frameworks (I'm looking at your `tailwind`)
+- Simplifies integration with CSS frameworks (I'm looking at you `tailwind`)
 
+## Requirements
+
+- CakePHP 5.0 or higher
+- PHP 8.2 or higher
 
 ## Installation
 
@@ -133,11 +137,10 @@ echo $this->Form->control('username', [
 // <input type="text" name="username" class="form-control mb-2 is-invalid" data-toggle="override" aria-label="Custom input" />
 ```
 
-## Requirements
+## Contributing
 
-- CakePHP 5.0 or higher
-- PHP 8.2 or higher
+Contributions, issues, and feature requests are welcome! Feel free to open a pull request or issue on GitHub. Please follow CakePHP coding standards and ensure all code is properly tested before submitting.
 
 ## License
 
-Licensed under the [MIT License](https://opensource.org/licenses/mit-license.php).
+[MIT](LICENSE.md)
