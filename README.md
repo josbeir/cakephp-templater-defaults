@@ -55,7 +55,7 @@ As you can see in the example above, the `class` is added twice. This is of cour
 
 ## Usage
 
-### 1. Configure the Helper
+### Configure the Helper
 
 In your `AppView.php`, specify the custom template class for any helper you want to use with default attributes:
 
@@ -69,7 +69,7 @@ $this->loadHelper('Form', [
 ]);
 ```
 
-### 2. Define Templates with defaults
+### Define Templates with defaults
 
 Add default attributes to your templates. For example, to set a default class and a custom data attribute for all input fields:
 
@@ -100,7 +100,7 @@ Renders to
 <input type="text" name="field" class="defaultClass" data-star="wars" />
 ```
 
-### 3. Merging default and runtime values
+### Merging default and runtime values
 
 If you want to merge default values with those provided at runtime (e.g., for classes), use an array for the default value:
 
@@ -127,7 +127,26 @@ Renders to
 <input type="text" name="field" class="firstClass secondClass thirdClass" />
 ```
 
-### 4. Advanced Example: Multiple Attributes
+#### Removing default values at runtime
+
+There may be situations where you want to remove the default values. In that case, you can pass `false` as the attribute value, and the attribute will then be removed from the element.
+
+Remove entire attribute:
+
+```php
+<?= $this->Form->control('field', ['class' => 'false']); ?>
+// <input type="text" name="field" />
+```
+
+You can also bypass default values and only add runtime values:
+
+```php
+<?= $this->Form->control('field', ['class' => '!!there-can-be-only-one']); ?>
+// <input type="text" name="field" class="there-can-be-only-one" />
+```
+
+
+### Advanced Example: Multiple Attributes
 
 You can set defaults for any attribute, including data attributes and ARIA properties:
 

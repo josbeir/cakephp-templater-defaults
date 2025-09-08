@@ -52,6 +52,32 @@ class StringTemplateTest extends TestCase
         $this->assertEquals('<input class="defaultClass" type="text" name="myName">', $formatted);
     }
 
+    public function testFalseValue(): void
+    {
+        $formatted = $this->templater->format('input', [
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'false',
+            ]),
+            'type' => 'text',
+            'name' => 'myName',
+        ]);
+
+        $this->assertEquals('<input type="text" name="myName">', $formatted);
+    }
+
+    public function testByPassValue(): void
+    {
+        $formatted = $this->templater->format('input_extra_attribs', [
+            'attrs' => $this->templater->formatAttributes([
+                'class' => '!!my other class',
+            ]),
+            'type' => 'text',
+            'name' => 'myName',
+        ]);
+
+        $this->assertStringContainsString('class="my other class"', $formatted);
+    }
+
     public function testExtraAttribs(): void
     {
         $formatted = $this->templater->format('input_extra_attribs', [

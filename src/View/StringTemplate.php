@@ -47,8 +47,18 @@ class StringTemplate extends StringTemplateBase
             foreach ($attrMatches as $match) {
                 $attribute_key = $match[1];
                 $attribute_value = $match[3];
-                $defaults_value = $defaults[$attribute_key] ?? null;
 
+                if (str_starts_with($attribute_value, '!!')) {
+                    $attribute_value = substr($attribute_value, 2);
+                    unset($defaults[$attribute_key]);
+                }
+
+                if ($attribute_value === 'false') {
+                    unset($defaults[$attribute_key]);
+                    continue;
+                }
+
+                $defaults_value = $defaults[$attribute_key] ?? null;
                 if (is_array($defaults_value)) {
                     $attribute_value = (array)$attribute_value;
                 }
