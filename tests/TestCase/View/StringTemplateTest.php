@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TemplaterDefaults\Test\TestCase\View;
 
 use Cake\TestSuite\TestCase;
+use RuntimeException;
 use TemplaterDefaults\View\StringTemplate;
 
 class StringTemplateTest extends TestCase
@@ -32,6 +33,22 @@ class StringTemplateTest extends TestCase
             'no_html_tample' => [
                 'template' => '{{content}}',
                 'defaults' => ['class' => ['defaultClass']],
+            ],
+            'callable' => [
+                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
+                'defaults' => function (array $attributes): array {
+                    $attributes['attrib1'] = 'Do. Or do not!';
+                    $attributes['attrib2'] = 'There is no try.';
+                    $attributes['class'] = [$attributes['class'], 'callableClass'];
+
+                    return $attributes;
+                },
+            ],
+            'callable_invalid' => [
+                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
+                'defaults' => function (array $attributes): string {
+                    return 'not good...';
+                },
             ],
         ]);
     }
@@ -98,5 +115,31 @@ class StringTemplateTest extends TestCase
         ]);
 
         $this->assertEquals('Hello world', $formatted);
+    }
+
+    public function testCallable(): void
+    {
+        $formatted = $this->templater->format('callable', [
+            'type' => 'text',
+            'name' => 'myName',
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'customClass',
+            ]),
+        ]);
+
+        $this->assertStringContainsString('attrib1="Do. Or do not!"', $formatted);
+        $this->assertStringContainsString('attrib2="There is no try."', $formatted);
+        $this->assertStringContainsString('class="customClass callableClass"', $formatted);
+    }
+
+    public function testInvalidCallable(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('`defaults` for template callable_invalid callable must return an array.');
+
+        $this->templater->format('callable_invalid', [
+            'type' => 'text',
+            'name' => 'myName',
+        ]);
     }
 }

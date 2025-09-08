@@ -5,6 +5,7 @@ namespace TemplaterDefaults\View;
 
 use Cake\Utility\Hash;
 use Cake\View\StringTemplate as StringTemplateBase;
+use RuntimeException;
 
 class StringTemplate extends StringTemplateBase
 {
@@ -58,15 +59,29 @@ class StringTemplate extends StringTemplateBase
                     continue;
                 }
 
-                $defaults_value = $defaults[$attribute_key] ?? null;
-                if (is_array($defaults_value)) {
-                    $attribute_value = (array)$attribute_value;
+                if (is_array($defaults)) {
+                    $defaults_value = $defaults[$attribute_key] ?? null;
+
+                    if (is_array($defaults_value)) {
+                        $attribute_value = (array)$attribute_value;
+                    }
                 }
 
                 $attributes[$attribute_key] = $attribute_value;
             }
 
-            $merged = Hash::merge($defaults, $attributes);
+            $merged = [];
+            if (is_callable($defaults)) {
+                $merged = $defaults($attributes);
+                if (!is_array($merged)) {
+                    throw new RuntimeException(
+                        sprintf('`defaults` for template %s callable must return an array.', $name),
+                    );
+                }
+            } else {
+                $merged = Hash::merge($defaults, $attributes);
+            }
+
             $attributes_string = $this->formatAttributes($merged);
 
             $formatted = preg_replace('/<(\w+)([^>]*)>/', '<$1' . $attributes_string . '>', $formatted);

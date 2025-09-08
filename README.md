@@ -22,6 +22,7 @@ A custom templater for CakePHP that enables you to define default HTML attribute
     - [Merging default and runtime values](#merging-default-and-runtime-values)
     - [Removing default values at runtime](#removing-default-values-at-runtime)
     - [Advanced Example: Multiple Attributes](#advanced-example-multiple-attributes)
+    - [Advanced Example: Using a callable](#advanced-example-using-a-callable)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -189,6 +190,25 @@ Renders to
 ```html
 <input type="text" name="username" class="form-control mb-2 is-invalid" data-toggle="override" aria-label="Custom input" />
 ```
+
+### Advanced Example: Using a callable
+
+Instead of defining an array with values, you can also use a callable to manipulate the attributes array.
+
+```php
+'templates' => [
+    'input' => [
+        'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
+        'defaults' => function (array $attributes) {
+          $attributes['custom-attribute'] = 'Hello there';
+          
+          return $attributes;
+        },
+    ],
+],
+```
+
+This allows you to manipulate the runtime values.
 
 ## Contributing
 
