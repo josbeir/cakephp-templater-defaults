@@ -84,7 +84,7 @@ class StringTemplate extends StringTemplateBase
 
             $attributes_string = $this->formatAttributes($merged);
 
-            $formatted = preg_replace('/<(\w+)([^>]*)>/', '<$1' . $attributes_string . '>', $formatted);
+            $formatted = preg_replace('/<(\w+)([^>]*)>/', '<$1' . $attributes_string . '>', $formatted, 1);
         }
 
         return (string)$formatted;

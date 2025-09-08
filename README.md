@@ -23,6 +23,7 @@ A custom templater for CakePHP that enables you to define default HTML attribute
     - [Removing default values at runtime](#removing-default-values-at-runtime)
     - [Advanced Example: Multiple Attributes](#advanced-example-multiple-attributes)
     - [Advanced Example: Using a callable](#advanced-example-using-a-callable)
+- [Limitations](#limitations)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -209,6 +210,10 @@ Instead of defining an array with values, you can also use a callable to manipul
 ```
 
 This allows you to manipulate the runtime values.
+## Limitations
+
+* Default attributes obviously only work on html/xml style templates
+* Only the top level element will be populated. Nested elements are ignored.
 
 ## Contributing
 

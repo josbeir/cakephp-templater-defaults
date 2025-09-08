@@ -50,6 +50,16 @@ class StringTemplateTest extends TestCase
                     return 'not good...';
                 },
             ],
+            'nested' => [
+                'template' => <<<'HTML'
+                    <div id="parent"{{attrs}}>
+                        <div class="nested">
+                            {{inner}}
+                        </div>
+                    </div>
+                HTML,
+                'defaults' => ['class' => 'outerClass'],
+            ],
         ]);
     }
 
@@ -141,5 +151,16 @@ class StringTemplateTest extends TestCase
             'type' => 'text',
             'name' => 'myName',
         ]);
+    }
+
+    public function testNested(): void
+    {
+        $formatted = $this->templater->format('nested', [
+            'inner' => 'Inner content',
+        ]);
+
+        $this->assertStringContainsString('<div class="outerClass" id="parent">', $formatted);
+        $this->assertStringContainsString('<div class="nested">', $formatted);
+        $this->assertStringContainsString('Inner content', $formatted);
     }
 }
