@@ -212,7 +212,13 @@ Instead of defining an array with values, you can also use a callable to manipul
 
 ### Advanced Example: Setting Template Classes at Runtime
 
-Sometimes you need to add attributes to nested template elements, not just the main element. This plugin supports a special syntax to target specific templates within a helper's rendering process.
+Sometimes you need to add attributes to parent template elements, not just the element where attributes are applied to (like Form::control). This plugin supports a special syntax to target specific templates within a helper's rendering process.
+
+> [!IMPORTANT]
+> This method only works on templates where the attribute is set on the element being rendered. For instance: the attribute is set on the input element, which is part of the inputContainer template. This works. 
+> For instance: Setting `label:class="class"` on form->control will not work because the input control where this attribute was set on is not rendered inside the label template. You can therefore only target template names that have the available attribute inside.
+
+That said, a handy use case is controlling the wrapper attributes of Form->control:
 
 **Example: Adding classes to the input container**
 
@@ -243,27 +249,6 @@ Which renders:
 <div class="input text custom-container">
     <label for="field">Field</label>
     <input type="text" name="field" id="field" />
-</div>
-```
-
-**Multiple template targeting:**
-
-You can target multiple templates in a single call:
-
-```php
-<?= $this->Form->control('field', [
-    'class' => 'field-input',
-    'inputContainer:class' => 'container-style',
-    'label:class' => 'label-style'
-]); ?>
-```
-
-Which renders:
-
-```html
-<div class="input text container-style">
-    <label for="field" class="label-style">Field</label>
-    <input type="text" name="field" class="field-input" id="field" />
 </div>
 ```
 
