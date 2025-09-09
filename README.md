@@ -162,7 +162,7 @@ You can also bypass default values and only add runtime values:
 ```
 
 
-### Advanced Example: Multiple Attributes
+### Example: Multiple Attributes
 
 You can set defaults for any attribute, including data attributes and ARIA properties:
 
@@ -192,7 +192,7 @@ Renders to
 <input type="text" name="username" class="form-control mb-2 is-invalid" data-toggle="override" aria-label="Custom input" />
 ```
 
-### Advanced Example: Using a callable
+### Example: Using a callable
 
 Instead of defining an array with values, you can also use a callable to manipulate the attributes array.
 
@@ -209,7 +209,71 @@ Instead of defining an array with values, you can also use a callable to manipul
 ],
 ```
 
+### Advanced Example: Setting Template Classes at Runtime
+
+Sometimes you need to add attributes to nested template elements, not just the main element. This plugin supports a special syntax to target specific templates within a helper's rendering process.
+
+**Example: Adding classes to the input container**
+
+Instead of only styling the input field itself:
+
+```php
+<?= $this->Form->control('field', ['class' => 'myclass']); ?>
+```
+
+Which renders:
+
+```html
+<div class="input text">
+    <label for="field">Field</label>
+    <input type="text" name="field" class="myclass" id="field" />
+</div>
+```
+
+You can target the parent container using the template name prefix (please note the **dasherized** container name): 
+
+```php
+<?= $this->Form->control('field', ['input-container:class' => 'custom-container']); ?>
+```
+
+Which renders:
+
+```html
+<div class="input text custom-container">
+    <label for="field">Field</label>
+    <input type="text" name="field" id="field" />
+</div>
+```
+
+**Multiple template targeting:**
+
+You can target multiple templates in a single call:
+
+```php
+<?= $this->Form->control('field', [
+    'class' => 'field-input',
+    'inputContainer:class' => 'container-style',
+    'label:class' => 'label-style'
+]); ?>
+```
+
+Which renders:
+
+```html
+<div class="input text container-style">
+    <label for="field" class="label-style">Field</label>
+    <input type="text" name="field" class="field-input" id="field" />
+</div>
+```
+
+**Syntax:**
+
+Use the format `template-name:attributeName` where:
+- `template-name` is the **dasherized** name of the template you want to target (e.g., `inputContainer`, `label`, `error`)
+- `attributeName` is the HTML attribute you want to modify (e.g., `class`, `data-toggle`, `id`)
+
 This allows you to manipulate the runtime values.
+
 ## Limitations
 
 * Default attributes obviously only work on html/xml style templates

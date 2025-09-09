@@ -163,4 +163,25 @@ class StringTemplateTest extends TestCase
         $this->assertStringContainsString('<div class="nested">', $formatted);
         $this->assertStringContainsString('Inner content', $formatted);
     }
+
+    public function testNamed(): void
+    {
+        $templates = new StringTemplate([
+            'input_extra_attribs' => [
+                'template' => '<input type="{{type}}" name="test"{{attrs}}>',
+                'defaults' => [
+                    'class' => ['otherclass'],
+                ],
+            ],
+        ]);
+
+        $formatted = $templates->format('input_extra_attribs', [
+            'attrs' => $this->templater->formatAttributes([
+                'type' => 'text',
+                'input-extra-attribs:class' => 'customClass',
+            ]),
+        ]);
+
+        $this->assertEquals('<input class="otherclass customClass" type="text" name="test">', $formatted);
+    }
 }
