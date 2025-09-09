@@ -46,7 +46,7 @@ class StringTemplate extends StringTemplateBase
     protected function extractNamed(string $templateName, string &$formatted): array
     {
         $dashedName = Inflector::dasherize($templateName);
-        $pattern = '/\s*\b' . preg_quote($dashedName, '/') . ':(\w+)=(["\'])(.*?)(\2)\s*/';
+        $pattern = '/\s*\b' . preg_quote($dashedName, '/') . ':(\w+(?:-\w+)*)=(["\'])(.*?)(\2)\s*/';
         $attributes = [];
         $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes): string {
             $attributes[$matches[1]] = [$matches[3]];

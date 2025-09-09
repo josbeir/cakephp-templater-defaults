@@ -167,7 +167,13 @@ class StringTemplateTest extends TestCase
     public function testNamed(): void
     {
         $templates = new StringTemplate([
-            'inputContainer' => '<input type="{{type}}" name="test"{{attrs}}>',
+            'inputContainer' => <<<'HTML'
+                <div{{attrs}}>
+                    <div class="nested">
+                        {{inner}}
+                    </div>
+                </div>
+            HTML,
             'input_extra_attribs' => [
                 'template' => '<input type="{{type}}" name="test"{{attrs}}>',
                 'defaults' => [
@@ -192,6 +198,6 @@ class StringTemplateTest extends TestCase
             ]),
         ]);
 
-        $this->assertEquals('<input class="customClass" type="text" name="test">', $formatted2);
+        $this->assertStringContainsString('<div class="customClass" type="text"> <div class="nested"> </div> </div>', $formatted2);
     }
 }
