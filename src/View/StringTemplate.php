@@ -48,6 +48,7 @@ class StringTemplate extends StringTemplateBase
         $dashedName = Inflector::dasherize($templateName);
         $pattern = '/\s*\b' . preg_quote($dashedName, '/') . ':(\w+(?:-\w+)*)=(["\'])(.*?)(\2)\s*/';
         $attributes = [];
+
         $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes): string {
             $attributes[$matches[1]] = [$matches[3]];
 
@@ -79,8 +80,9 @@ class StringTemplate extends StringTemplateBase
 
         if (($callable || $defaults) && preg_match('/<(\w+)([^>]*)>/', $formatted, $matches)) {
             $attributesString = $matches[2];
-            preg_match_all('/(\w+)=(["\'])([^"\']*)\2/', $attributesString, $attrMatches, PREG_SET_ORDER);
+            preg_match_all('/(\w+(?:-\w+)*(?::\w+(?:-\w+)*)?)=(["\'])([^"\']*)\2/', $attributesString, $attrMatches, PREG_SET_ORDER);
             $attributes = [];
+
             foreach ($attrMatches as $match) {
                 $key = $match[1];
                 $value = $match[3];
