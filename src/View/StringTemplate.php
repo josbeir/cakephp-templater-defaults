@@ -80,7 +80,13 @@ class StringTemplate extends StringTemplateBase
 
         if (($callable || $defaults) && preg_match('/<(\w+)([^>]*)>/', $formatted, $matches)) {
             $attributesString = $matches[2];
-            preg_match_all('/(\w+(?:-\w+)*(?::\w+(?:-\w+)*)?)=(["\'])([^"\']*)\2/', $attributesString, $attrMatches, PREG_SET_ORDER);
+            preg_match_all(
+                '/(\w+(?:-\w+)*(?::\w+(?:-\w+)*)?)=(["\'])([^"\']*)\2/',
+                $attributesString,
+                $attrMatches,
+                PREG_SET_ORDER,
+            );
+
             $attributes = [];
 
             foreach ($attrMatches as $match) {
