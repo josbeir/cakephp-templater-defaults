@@ -167,6 +167,7 @@ class StringTemplateTest extends TestCase
     public function testNamed(): void
     {
         $templates = new StringTemplate([
+            'inputContainer' => '<input type="{{type}}" name="test"{{attrs}}>',
             'input_extra_attribs' => [
                 'template' => '<input type="{{type}}" name="test"{{attrs}}>',
                 'defaults' => [
@@ -183,5 +184,14 @@ class StringTemplateTest extends TestCase
         ]);
 
         $this->assertEquals('<input class="otherclass customClass" type="text" name="test">', $formatted);
+
+        $formatted2 = $templates->format('inputContainer', [
+            'attrs' => $this->templater->formatAttributes([
+                'type' => 'text',
+                'input-container:class' => 'customClass',
+            ]),
+        ]);
+
+        $this->assertEquals('<input class="customClass" type="text" name="test">', $formatted2);
     }
 }

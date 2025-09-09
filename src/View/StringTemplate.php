@@ -116,6 +116,8 @@ class StringTemplate extends StringTemplateBase
                 $finalAttributes = Hash::merge($defaults, $attributes);
             }
 
+            $finalAttributes['escape'] = false;
+
             $attributesString = $this->formatAttributes($finalAttributes);
             $formatted = preg_replace('/<(\w+)([^>]*)>/', '<$1' . $attributesString . '>', $formatted, 1);
         }
