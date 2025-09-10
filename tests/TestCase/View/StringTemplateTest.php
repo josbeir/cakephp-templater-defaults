@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace TemplaterDefaults\Test\TestCase\View;
 
 use Cake\TestSuite\TestCase;
-use RuntimeException;
+use Cake\View\Helper\FormHelper;
+use Cake\View\View;
 use TemplaterDefaults\View\StringTemplate;
 
 class StringTemplateTest extends TestCase
@@ -16,188 +17,100 @@ class StringTemplateTest extends TestCase
         parent::setUp();
 
         $this->templater = new StringTemplate([
-            'plain' => '<strong>{{text}}</strong>',
-            'input' => [
-                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
-                'defaults' => ['class' => 'defaultClass'],
-            ],
-            'input_extra_attribs' => [
-                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
-                'defaults' => [
-                    'attrib1' => 'Annakin!',
-                    'attrib2' => 'I have the higher ground.',
-                    'attrib3' => ['merge-1'],
-                    'class' => ['defaultClass'],
-                ],
-            ],
-            'no_html_tample' => [
-                'template' => '{{content}}',
-                'defaults' => ['class' => ['defaultClass']],
-            ],
-            'callable' => [
-                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
-                'defaults' => function (array $attributes): array {
-                    $attributes['attrib1'] = 'Do. Or do not!';
-                    $attributes['attrib2'] = 'There is no try.';
-                    $attributes['class'] = [$attributes['class'], 'callableClass'];
-
-                    return $attributes;
-                },
-            ],
-            'callable_invalid' => [
-                'template' => '<input type="{{type}}" name="{{name}}"{{attrs}}>',
-                'defaults' => function (array $attributes): string {
-                    return 'not good...';
-                },
-            ],
-            'nested' => [
-                'template' => <<<'HTML'
-                    <div id="parent"{{attrs}}>
-                        <div class="nested">
-                            {{inner}}
-                        </div>
-                    </div>
-                HTML,
-                'defaults' => ['class' => 'outerClass'],
-            ],
+            'input' => '<input class="bg-red-800 p-2 text-white rounded-sm" type="{{type}}" name="{{name}}"{{attrs}}>',
+            'no_Html' => '{{label}}',
         ]);
     }
 
     public function testPlain(): void
     {
-        $formatted = $this->templater->format('plain', ['text' => 'Hello world']);
-        $this->assertEquals('<strong>Hello world</strong>', $formatted);
+        $formatted = $this->templater->format('input', [
+            'type' => 'input',
+            'name' => 'test',
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'default-class runtime-class another class',
+            ]),
+        ]);
+
+        $this->assertSame(
+            '<input class="bg-red-800 p-2 text-white rounded-sm default-class runtime-class another class" type="input" name="test">',
+            $formatted,
+        );
     }
 
-    public function testDefault(): void
+    public function testNamedSwap(): void
     {
         $formatted = $this->templater->format('input', [
-            'type' => 'text',
-            'name' => 'myName',
+            'type' => 'input',
+            'name' => 'test',
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'default-class runtime-class another class',
+                'class:swap' => 'swapped-class',
+            ]),
         ]);
 
-        $this->assertEquals('<input class="defaultClass" type="text" name="myName">', $formatted);
+        $this->assertSame(
+            '<input class="swapped-class" type="input" name="test">',
+            $formatted,
+        );
     }
 
-    public function testFalseValue(): void
+    public function testEmptySwap(): void
     {
         $formatted = $this->templater->format('input', [
+            'type' => 'input',
+            'name' => 'test',
             'attrs' => $this->templater->formatAttributes([
-                'class' => 'false',
-            ]),
-            'type' => 'text',
-            'name' => 'myName',
-        ]);
-
-        $this->assertEquals('<input type="text" name="myName">', $formatted);
-    }
-
-    public function testByPassValue(): void
-    {
-        $formatted = $this->templater->format('input_extra_attribs', [
-            'attrs' => $this->templater->formatAttributes([
-                'class' => '!!my other class',
-            ]),
-            'type' => 'text',
-            'name' => 'myName',
-        ]);
-
-        $this->assertStringContainsString('class="my other class"', $formatted);
-    }
-
-    public function testExtraAttribs(): void
-    {
-        $formatted = $this->templater->format('input_extra_attribs', [
-            'attrs' => $this->templater->formatAttributes([
-                'class' => 'customClass',
-                'attrib3' => ['merge-2', 'merge-3'],
+                'class' => 'default-class runtime-class another class',
+                'class:swap' => '',
             ]),
         ]);
 
-        $this->assertEquals('<input attrib1="Annakin!" attrib2="I have the higher ground." attrib3="merge-1 merge-2 merge-3" class="defaultClass customClass" type="" name="">', $formatted);
+        $this->assertSame(
+            '<input type="input" name="test">',
+            $formatted,
+        );
     }
 
-    public function testNoHtml(): void
+    public function testWithFormHelper()
     {
-        $formatted = $this->templater->format('no_html_tample', [
-            'content' => 'Hello world',
-            'attrs' => $this->templater->formatAttributes(['class' => 'customClass']),
-        ]);
-
-        $this->assertEquals('Hello world', $formatted);
-    }
-
-    public function testCallable(): void
-    {
-        $formatted = $this->templater->format('callable', [
-            'type' => 'text',
-            'name' => 'myName',
-            'attrs' => $this->templater->formatAttributes([
-                'class' => 'customClass',
-            ]),
-        ]);
-
-        $this->assertStringContainsString('attrib1="Do. Or do not!"', $formatted);
-        $this->assertStringContainsString('attrib2="There is no try."', $formatted);
-        $this->assertStringContainsString('class="customClass callableClass"', $formatted);
-    }
-
-    public function testInvalidCallable(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('`defaults` for template callable_invalid callable must return an array.');
-
-        $this->templater->format('callable_invalid', [
-            'type' => 'text',
-            'name' => 'myName',
-        ]);
-    }
-
-    public function testNested(): void
-    {
-        $formatted = $this->templater->format('nested', [
-            'inner' => 'Inner content',
-        ]);
-
-        $this->assertStringContainsString('<div class="outerClass" id="parent">', $formatted);
-        $this->assertStringContainsString('<div class="nested">', $formatted);
-        $this->assertStringContainsString('Inner content', $formatted);
-    }
-
-    public function testNamed(): void
-    {
-        $templates = new StringTemplate([
-            'inputContainer' => <<<'HTML'
-                <div{{attrs}}>
-                    <div class="nested">
-                        {{inner}}
-                    </div>
-                </div>
-            HTML,
-            'input_extra_attribs' => [
-                'template' => '<input type="{{type}}" name="test"{{attrs}}>',
-                'defaults' => [
-                    'class' => ['otherclass'],
-                ],
+        $View = new View();
+        $helper = new FormHelper($View, [
+            'templateClass' => StringTemplate::class,
+            'templates' => [
+                'input' => '<input class="class1" type="{{type}}" name="{{name}}"{{attrs}}>',
             ],
         ]);
 
-        $formatted = $templates->format('input_extra_attribs', [
-            'attrs' => $this->templater->formatAttributes([
-                'type' => 'text',
-                'input-extra-attribs:class' => 'customClass',
-            ]),
+        $control = $helper->control('field', [
+            'type' => 'text',
+            'class' => 'class2 class3',
         ]);
 
-        $this->assertEquals('<input class="otherclass customClass" type="text" name="test">', $formatted);
+        $this->assertEquals(
+            '<div class="input text"><label for="field">Field</label><input class="class1 class2 class3" type="text" name="field" id="field"></div>',
+            $control,
+        );
+    }
 
-        $formatted2 = $templates->format('inputContainer', [
-            'attrs' => $this->templater->formatAttributes([
-                'type' => 'text',
-                'input-container:class' => 'customClass',
-            ]),
+    public function testWithFormHelperSwap()
+    {
+        $View = new View();
+        $helper = new FormHelper($View, [
+            'templateClass' => StringTemplate::class,
+            'templates' => [
+                'input' => '<input class="class1" type="{{type}}" name="{{name}}"{{attrs}}>',
+            ],
         ]);
 
-        $this->assertStringContainsString('<div class="customClass" type="text"> <div class="nested"> </div> </div>', $formatted2);
+        $control = $helper->control('field', [
+            'type' => 'text',
+            'class:swap' => ['swapped-class', 'swapped-class2'],
+        ]);
+
+        $this->assertStringContainsString(
+            '<input class="swapped-class swapped-class2" type="text" name="field" id="field">',
+            $control,
+        );
     }
 }

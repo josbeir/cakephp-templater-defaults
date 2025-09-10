@@ -3,39 +3,10 @@ declare(strict_types=1);
 
 namespace TemplaterDefaults\View;
 
-use Cake\Utility\Hash;
-use Cake\Utility\Inflector;
 use Cake\View\StringTemplate as StringTemplateBase;
-use RuntimeException;
 
 class StringTemplate extends StringTemplateBase
 {
-    /**
-     * Stores default attributes for each template.
-     *
-     * @var array<string, array|callable>
-     */
-    protected array $defaults = [];
-
-    /**
-     * @inheritDoc
-     */
-    public function add(array $templates, bool $merge = true)
-    {
-        foreach ($templates as $name => $template) {
-            if (is_array($template)) {
-                $template += [
-                    'template' => '',
-                    'defaults' => [],
-                ];
-                $this->defaults[$name] = $template['defaults'];
-                $templates[$name] = $template['template'];
-            }
-        }
-
-        return parent::add($templates);
-    }
-
     /**
      * Extracts named attributes from the formatted string for a given template.
      *
@@ -43,14 +14,17 @@ class StringTemplate extends StringTemplateBase
      * @param string &$formatted The formatted string (modified in-place).
      * @return array Extracted attributes.
      */
-    protected function extractNamed(string $templateName, string &$formatted): array
+    protected function extractNamed(string &$formatted): array
     {
-        $dashedName = Inflector::dasherize($templateName);
-        $pattern = '/\s*\b' . preg_quote($dashedName, '/') . ':(\w+(?:-\w+)*)=(["\'])(.*?)(\2)\s*/';
+        $pattern = '/\s*\b(\w+(?:-\w+)*):(\w+(?:-\w+)*)=(["\'])(.*?)\3\s*/';
         $attributes = [];
 
         $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes): string {
-            $attributes[$matches[1]] = [$matches[3]];
+            $attribute = $matches[1];
+            $option = $matches[2];
+            $value = $matches[4];
+
+            $attributes[$option][$attribute][] = $value;
 
             return '';
         }, $formatted);
@@ -67,18 +41,9 @@ class StringTemplate extends StringTemplateBase
     public function format(string $name, array $data): string
     {
         $formatted = parent::format($name, $data);
-        $defaults = $this->defaults[$name] ?? [];
+        $named = $this->extractNamed($formatted);
 
-        $callable = null;
-        if (is_callable($defaults)) {
-            $callable = $defaults;
-            $defaults = [];
-        }
-
-        $namedAttributes = $this->extractNamed($name, $formatted);
-        $defaults = Hash::merge($defaults, $namedAttributes);
-
-        if (($callable || $defaults) && preg_match('/<(\w+)([^>]*)>/', $formatted, $matches)) {
+        if (preg_match('/<(\w+)([^>]*)>/', $formatted, $matches)) {
             $attributesString = $matches[2];
             preg_match_all(
                 '/(\w+(?:-\w+)*(?::\w+(?:-\w+)*)?)=(["\'])([^"\']*)\2/',
@@ -92,41 +57,23 @@ class StringTemplate extends StringTemplateBase
             foreach ($attrMatches as $match) {
                 $key = $match[1];
                 $value = $match[3];
-
-                // Remove default if value starts with '!!'
-                if (str_starts_with($value, '!!')) {
-                    $value = substr($value, 2);
-                    unset($defaults[$key]);
-                }
-
-                // Remove default if value is 'false'
-                if ($value === 'false') {
-                    unset($defaults[$key]);
-                    continue;
-                }
-
-                $defaultValue = $defaults[$key] ?? null;
-                if (is_array($defaultValue)) {
-                    $value = (array)$value;
-                }
-
-                $attributes[$key] = $value;
+                $attributes[$key][] = htmlspecialchars_decode($value);
             }
 
-            if ($callable !== null) {
-                $finalAttributes = $callable($attributes);
-                if (!is_array($finalAttributes)) {
-                    throw new RuntimeException(
-                        sprintf('`defaults` for template %s callable must return an array.', $name),
-                    );
+            if (isset($named['swap'])) {
+                foreach ($named['swap'] as $key => $replacements) {
+                    if (isset($attributes[$key])) {
+                        $replacements = array_filter($replacements);
+                        if (empty($replacements)) {
+                            unset($attributes[$key]);
+                        } else {
+                            $attributes[$key] = $replacements;
+                        }
+                    }
                 }
-            } else {
-                $finalAttributes = Hash::merge($defaults, $attributes);
             }
 
-            $finalAttributes['escape'] = false;
-
-            $attributesString = $this->formatAttributes($finalAttributes);
+            $attributesString = $this->formatAttributes($attributes);
             $formatted = preg_replace('/<(\w+)([^>]*)>/', '<$1' . $attributesString . '>', $formatted, 1);
         }
 
