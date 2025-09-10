@@ -72,7 +72,7 @@ class StringTemplateTest extends TestCase
         );
     }
 
-    public function testWithFormHelper()
+    public function testWithFormHelper(): void
     {
         $View = new View();
         $helper = new FormHelper($View, [
@@ -93,7 +93,7 @@ class StringTemplateTest extends TestCase
         );
     }
 
-    public function testWithFormHelperSwap()
+    public function testWithFormHelperSwap(): void
     {
         $View = new View();
         $helper = new FormHelper($View, [

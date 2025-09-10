@@ -8,11 +8,10 @@ use Cake\View\StringTemplate as StringTemplateBase;
 class StringTemplate extends StringTemplateBase
 {
     /**
-     * Extracts named attributes from the formatted string for a given template.
+     * Extracts named attributes from the formatted string.
      *
-     * @param string $templateName The template name.
-     * @param string &$formatted The formatted string (modified in-place).
-     * @return array Extracted attributes.
+     * @param string $formatted The formatted string to extract named attributes from.
+     * @return array An associative array of named attributes.
      */
     protected function extractNamed(string &$formatted): array
     {
@@ -64,7 +63,7 @@ class StringTemplate extends StringTemplateBase
                 foreach ($named['swap'] as $key => $replacements) {
                     if (isset($attributes[$key])) {
                         $replacements = array_filter($replacements);
-                        if (empty($replacements)) {
+                        if ($replacements === []) {
                             unset($attributes[$key]);
                         } else {
                             $attributes[$key] = $replacements;

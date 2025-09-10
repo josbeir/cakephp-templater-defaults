@@ -25,8 +25,6 @@ CakePHP's StringTemplates system does not allow merging attributes set at runtim
 6. [Contributing](#contributing)
 7. [License](#license)
 
----
-
 ## Features
 
 - **Attribute Merging**: Runtime attributes are merged with template defaults, allowing easy extension or override.
@@ -41,6 +39,39 @@ Install via Composer:
 composer require josbeir/cakephp-templater-defaults
 ```
 
+## Why
+
+Imagine this template defintion for your FormHelper
+```php
+'templates' => [
+    'input' => '<input class="border border-slate-500 rounded-sm max-w-md min-w-4" type="{{type}}" name="{{name}}"{{attrs}}>',
+];
+```
+
+In many cases you will want to add classes to control the size, width, etc. of those elements. This is not possible in core's `StringTemplate` unless you override the entire template at runtime on a per-element basis.
+
+```php
+$this->Form->control('field', ['class' => 'extra-class']);
+// Renders to
+<div class="input text">
+  <label>...</label>
+  <input class="border border-slate-500 rounded-sm max-w-md min-w-4" type="text" name="field" class="extra-class">
+</div>
+```
+
+**This is not expected behavior.**
+
+Rather than doing that, this plugin uses a different approach: it merges the existing (default) attributes with ones defined at runtime:
+
+```php
+$this->Form->control('field', ['class' => 'extra-class']);
+// Renders to
+<div class="input text">
+  <label>...</label>
+  <input class="border border-slate-500 rounded-sm max-w-md min-w-4 extra-class" type="text" name="field">
+</div>
+```
+
 ## Usage
 
 You can use the custom `StringTemplate` class directly or configure CakePHP helpers (like `FormHelper`) to use it:
@@ -53,7 +84,6 @@ use \TemplaterDefaults\View\StringTemplate;
 $this->loadHelper('Form', [
     'templateClass' => StringTemplate::class,
 ]);
-// <input class="class1 class2 class3" ... >
 ```
 
 ## Examples
@@ -92,9 +122,6 @@ echo $this->Form->control('field', [
 
 // <input ... >
 ```
-
-## Limitations
-
 
 ## Limitations
 
