@@ -29,7 +29,8 @@ class StringTemplate extends StringTemplateBase
         }, $formatted);
 
         // Clean up extra spaces
-        $formatted = (string)preg_replace(['/\s+/', '/\s+>/'], [' ', '>'], $formatted);
+        $formatted = (string)preg_replace('/(<[^>]*)\s+([^>]*>)/', '$1 $2', $formatted);
+        $formatted = (string)preg_replace('/(<[^>]*)\s+>/', '$1>', $formatted);
 
         return $attributes;
     }
