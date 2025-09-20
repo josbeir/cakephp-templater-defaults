@@ -16,7 +16,7 @@ class StringTemplate extends StringTemplateBase
     protected function extractNamed(string &$formatted): array
     {
         $supportedIdentifiers = ['swap'];
-        $pattern = '/\s*(\w+(?:-\w+)*):(\w+(?:-\w+)*)=(["\'])(.*?)\3\s*/';
+        $pattern = '/\s*\b(\w+(?:-\w+)*):(\w+(?:-\w+)*)\b=(["\'])(.*?)\3\s*/';
         $attributes = [];
 
         $formatted = (string)preg_replace_callback(
@@ -55,7 +55,7 @@ class StringTemplate extends StringTemplateBase
         if (preg_match('/<(\w+)([^>]*)>/', $formatted, $matches)) {
             $attributesString = $matches[2];
             preg_match_all(
-                '/([a-zA-Z@][a-zA-Z0-9\-.:]*(?::\w+(?:-\w+)*)?)=(["\'])([^"\']*)\2/',
+                '/([a-zA-Z@][a-zA-Z0-9\-.:@]*)=(["\'])(.*?)\2+/',
                 $attributesString,
                 $attrMatches,
                 PREG_SET_ORDER,

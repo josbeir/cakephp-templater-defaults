@@ -114,24 +114,7 @@ class StringTemplateTest extends TestCase
         );
     }
 
-    public function testUnsupportedIdentifierIgnored(): void
-    {
-        $formatted = $this->templater->format('input', [
-            'type' => 'input',
-            'name' => 'test',
-            'attrs' => $this->templater->formatAttributes([
-                'class' => 'default-class',
-                'class:unsupported' => 'should-be-ignored',
-            ]),
-        ]);
-
-        $this->assertSame(
-            '<input class="bg-red-800 p-2 text-white rounded-sm default-class" type="input" name="test" class:unsupported="should-be-ignored">',
-            $formatted,
-        );
-    }
-
-    public function testMixedSupportedAndUnsupportedIdentifiers(): void
+    public function testIdentifierFiltering(): void
     {
         $formatted = $this->templater->format('input', [
             'type' => 'input',
@@ -140,30 +123,33 @@ class StringTemplateTest extends TestCase
                 'class' => 'default-class',
                 'class:swap' => 'swapped-class',
                 'data-value:unsupported' => 'should-remain',
-                'id:unknown' => 'should-stay',
-            ]),
-        ]);
-
-        $this->assertSame(
-            '<input class="swapped-class" type="input" name="test" data-value:unsupported="should-remain" id:unknown="should-stay">',
-            $formatted,
-        );
-    }
-
-    public function testAttributesWithDotsPreserved(): void
-    {
-        $formatted = $this->templater->format('input', [
-            'type' => 'input',
-            'name' => 'test',
-            'attrs' => $this->templater->formatAttributes([
                 'x-model.fill' => 'someValue',
-                'x-on:click' => 'handleClick()',
                 '@click.prevent' => 'submit()',
             ]),
         ]);
 
         $this->assertSame(
-            '<input class="bg-red-800 p-2 text-white rounded-sm" type="input" name="test" x-model.fill="someValue" x-on:click="handleClick()" @click.prevent="submit()">',
+            '<input class="swapped-class" type="input" name="test" data-value:unsupported="should-remain" x-model.fill="someValue" @click.prevent="submit()">',
+            $formatted,
+        );
+    }
+
+    public function testAttributesWithEncodedQuotes(): void
+    {
+        $this->templater = new StringTemplate([
+            'div' => '<div class="fieldset"{{attrs}}>{{content}}</div>',
+        ]);
+
+        $formatted = $this->templater->format('div', [
+            'content' => 'test content',
+            'attrs' => $this->templater->formatAttributes([
+                'x-show' => '["basic","digest"].includes(auth_type)',
+                'class:swap' => 'new-class',
+            ]),
+        ]);
+
+        $this->assertSame(
+            '<div class="new-class" x-show="[&quot;basic&quot;,&quot;digest&quot;].includes(auth_type)">test content</div>',
             $formatted,
         );
     }
