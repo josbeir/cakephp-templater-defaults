@@ -113,4 +113,40 @@ class StringTemplateTest extends TestCase
             $control,
         );
     }
+
+    public function testUnsupportedIdentifierIgnored(): void
+    {
+        $formatted = $this->templater->format('input', [
+            'type' => 'input',
+            'name' => 'test',
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'default-class',
+                'class:unsupported' => 'should-be-ignored',
+            ]),
+        ]);
+
+        $this->assertSame(
+            '<input class="bg-red-800 p-2 text-white rounded-sm default-class" type="input" name="test" class:unsupported="should-be-ignored">',
+            $formatted,
+        );
+    }
+
+    public function testMixedSupportedAndUnsupportedIdentifiers(): void
+    {
+        $formatted = $this->templater->format('input', [
+            'type' => 'input',
+            'name' => 'test',
+            'attrs' => $this->templater->formatAttributes([
+                'class' => 'default-class',
+                'class:swap' => 'swapped-class',
+                'data-value:unsupported' => 'should-remain',
+                'id:unknown' => 'should-stay',
+            ]),
+        ]);
+
+        $this->assertSame(
+            '<input class="swapped-class" type="input" name="test" data-value:unsupported="should-remain" id:unknown="should-stay">',
+            $formatted,
+        );
+    }
 }

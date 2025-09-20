@@ -15,17 +15,22 @@ class StringTemplate extends StringTemplateBase
      */
     protected function extractNamed(string &$formatted): array
     {
+        $supportedIdentifiers = ['swap'];
         $pattern = '/\s*\b(\w+(?:-\w+)*):(\w+(?:-\w+)*)=(["\'])(.*?)\3\s*/';
         $attributes = [];
 
-        $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes): string {
+        $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes, $supportedIdentifiers): string {
             $attribute = $matches[1];
             $option = $matches[2];
             $value = $matches[4];
 
-            $attributes[$option][$attribute][] = $value;
+            if (in_array($option, $supportedIdentifiers, true)) {
+                $attributes[$option][$attribute][] = $value;
 
-            return '';
+                return '';
+            }
+
+            return $matches[0];
         }, $formatted);
 
         // Clean up extra spaces
