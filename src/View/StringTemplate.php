@@ -19,19 +19,23 @@ class StringTemplate extends StringTemplateBase
         $pattern = '/\s*(\w+(?:-\w+)*):(\w+(?:-\w+)*)=(["\'])(.*?)\3\s*/';
         $attributes = [];
 
-        $formatted = (string)preg_replace_callback($pattern, function (array $matches) use (&$attributes, $supportedIdentifiers): string {
-            $attribute = $matches[1];
-            $option = $matches[2];
-            $value = $matches[4];
+        $formatted = (string)preg_replace_callback(
+            $pattern,
+            function (array $matches) use (&$attributes, $supportedIdentifiers): string {
+                $attribute = $matches[1];
+                $option = $matches[2];
+                $value = $matches[4];
 
-            if (in_array($option, $supportedIdentifiers, true)) {
-                $attributes[$option][$attribute][] = $value;
+                if (in_array($option, $supportedIdentifiers, true)) {
+                    $attributes[$option][$attribute][] = $value;
 
-                return '';
-            }
+                    return '';
+                }
 
-            return $matches[0];
-        }, $formatted);
+                return $matches[0];
+            },
+            $formatted,
+        );
 
         // Clean up extra spaces
         $formatted = (string)preg_replace('/(<[^>]*)\s+([^>]*>)/', '$1 $2', $formatted);
