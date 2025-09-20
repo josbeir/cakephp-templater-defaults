@@ -149,4 +149,22 @@ class StringTemplateTest extends TestCase
             $formatted,
         );
     }
+
+    public function testAttributesWithDotsPreserved(): void
+    {
+        $formatted = $this->templater->format('input', [
+            'type' => 'input',
+            'name' => 'test',
+            'attrs' => $this->templater->formatAttributes([
+                'x-model.fill' => 'someValue',
+                'x-on:click' => 'handleClick()',
+                '@click.prevent' => 'submit()',
+            ]),
+        ]);
+
+        $this->assertSame(
+            '<input class="bg-red-800 p-2 text-white rounded-sm" type="input" name="test" x-model.fill="someValue" x-on:click="handleClick()" @click.prevent="submit()">',
+            $formatted,
+        );
+    }
 }
