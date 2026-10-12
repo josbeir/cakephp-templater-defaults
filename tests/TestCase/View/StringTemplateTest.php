@@ -88,7 +88,7 @@ class StringTemplateTest extends TestCase
         ]);
 
         $this->assertEquals(
-            '<div class="input text"><label for="field">Field</label><input class="class1 class2 class3" type="text" name="field" id="field"></div>',
+            '<div class="input"><label for="field">Field</label><input class="class1 class2 class3" type="text" name="field" id="field"></div>',
             $control,
         );
     }
@@ -112,6 +112,29 @@ class StringTemplateTest extends TestCase
             '<input class="swapped-class swapped-class2" type="text" name="field" id="field">',
             $control,
         );
+    }
+
+    public function testFormHelperSeparatesContentAndAttributeEscaping(): void
+    {
+        $helper = new FormHelper(new View(), [
+            'templateClass' => StringTemplate::class,
+            'templates' => [
+                'button' => '<button class="button-default"{{attrs}}>{{text}}</button>',
+            ],
+        ]);
+
+        $button = $helper->button('<strong>Save</strong>', [
+            'type' => 'button',
+            'class' => 'button-runtime',
+            'data-note' => '"Save" & continue',
+            'escape' => false,
+            'escapeAttributes' => true,
+        ]);
+
+        $this->assertStringContainsString('class="button-default button-runtime"', $button);
+        $this->assertStringContainsString('data-note="&quot;Save&quot; &amp; continue"', $button);
+        $this->assertStringContainsString('><strong>Save</strong></button>', $button);
+        $this->assertStringNotContainsString('escapeAttributes=', $button);
     }
 
     public function testIdentifierFiltering(): void
