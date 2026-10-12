@@ -7,12 +7,11 @@
     >
     <php>
         <ini name="memory_limit" value="-1"/>
-        <ini name="apc.enable_cli" value="1"/>
     </php>
 
     <!-- Add any additional test suites you want to run here -->
     <testsuites>
-        <testsuite name="LatteView">
+        <testsuite name="TemplaterDefaults">
             <directory>tests/TestCase/</directory>
         </testsuite>
     </testsuites>
